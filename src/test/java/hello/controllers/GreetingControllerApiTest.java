@@ -13,6 +13,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -141,6 +142,25 @@ public class GreetingControllerApiTest {
 		assertThat("Howdy, %s!", equalTo(arg.getValue().getTemplate()));
 	}
 
+	@Test
+	public void deleteGreeting() throws Exception {
+//		ArgumentCaptor<Greeting> arg = ArgumentCaptor.forClass(Greeting.class);
+//		when(greetingService.save(any(Greeting.class))).then(returnsFirstArg());
+		int id = 0;
+		Greeting g = new Greeting("%s");
+		when(greetingService.findById(id)).thenReturn(Optional.of(g));
+
+		mvc.perform(delete("/api/greetings/{id}",id).with(user("Rob").roles(Security.ADMIN_ROLE))
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent())
+				.andExpect(handler().methodName("deleteGreeting"));
+
+//		verify(greetingService).save(arg.capture());
+//		assertThat("Howdy, %s!", equalTo(arg.getValue().getTemplate()));
+		verify(greetingService, never()).save(any(Greeting.class));
+	}
+
+	
 	@Test
 	public void postBadGreeting() throws Exception {
 		mvc.perform(post("/api/greetings").with(user("Rob").roles(Security.ADMIN_ROLE))

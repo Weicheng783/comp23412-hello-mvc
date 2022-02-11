@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import hello.assemblers.GreetingModelAssembler;
@@ -75,4 +77,12 @@ public class GreetingControllerApi {
 
 		return ResponseEntity.created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri()).build();
 	}
+
+	@RequestMapping(value="/{id}" ,method=RequestMethod.DELETE)
+	public ResponseEntity<?> deleteGreeting(@PathVariable("id") long id) {
+		Greeting greeting = greetingService.findById(id).orElseThrow(() -> new GreetingNotFoundException(id));
+		greetingService.deleteById(id);
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+	}
+
 }

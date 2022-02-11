@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -157,6 +158,24 @@ public class GreetingControllerTest {
 
 		verify(greetingService).save(arg.capture());
 		assertThat("Howdy, %s!", equalTo(arg.getValue().getTemplate()));
+	}
+	
+	@Test
+	public void deleteGreeting() throws Exception {
+//		ArgumentCaptor<Greeting> arg = ArgumentCaptor.forClass(Greeting.class);
+//		when(greetingService.save(any(Greeting.class))).then(returnsFirstArg());
+		int id = 0;
+		Greeting g = new Greeting("%s");
+		when(greetingService.findById(id)).thenReturn(Optional.of(g));
+	
+		mvc.perform(delete("/greetings/{id}",id).with(user("Rob").roles(Security.ADMIN_ROLE))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.accept(MediaType.TEXT_HTML).with(csrf())).andExpect(status().isFound()).andExpect(content().string(""))
+				.andExpect(view().name("redirect:/greetings")).andExpect(model().hasNoErrors())
+				.andExpect(handler().methodName("deleteGreeting"));
+
+		verify(greetingService, never()).save(any(Greeting.class));
+		
 	}
 
 	@Test
